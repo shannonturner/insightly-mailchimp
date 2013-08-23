@@ -57,7 +57,7 @@ for email in emails:
         time.sleep(0.3)
         request = requests.get("{0}{1}".format(base_url, parameters), auth=(username, password))
         response_details = request.json()
-    except IOError, e:
+    except requests.ConnectionError, e:
         print "[ERROR] Fetch failed ({0}): {1}{2}".format(e, base_url, parameters)
 
     # NOTE: In some cases, multiple people may have the same email address.  All of these people will receive the tags.
@@ -81,7 +81,10 @@ for email in emails:
         new_contact = json.JSONEncoder().encode(new_contact)
 
         time.sleep(0.3)
-        post_contact = requests.post("{0}Contacts".format(base_url), auth=(username, password), headers=headers, data=new_contact)
+        try:
+            post_contact = requests.post("{0}Contacts".format(base_url), auth=(username, password), headers=headers, data=new_contact)
+        except requests.ConnectionError:
+            print "\t[ERROR] Post request failed -- Failed to add {0} as a new contact!".format(email)   
 
         if post_contact.status_code == 201:
             print "\tSuccessfully added {0}".format(email)
@@ -109,7 +112,10 @@ for email in emails:
             modified_contact = json.JSONEncoder().encode(modified_contact)
 
             time.sleep(0.3)
-            put_contact = requests.put("{0}Contacts/{1}".format(base_url, contact_id), auth=(username, password), headers=headers, data=modified_contact)
+            try:
+                put_contact = requests.put("{0}Contacts/{1}".format(base_url, contact_id), auth=(username, password), headers=headers, data=modified_contact)
+            except requests.ConnectionError:
+                print "\t[ERROR] Put request failed -- Update failed!"                
 
             if put_contact.status_code != 200:
                 print "\t[ERROR] Update failed! Status code: {0}".format(put_contact.status_code)
