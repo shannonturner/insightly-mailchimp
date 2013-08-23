@@ -38,7 +38,7 @@ for tag in tags:
         request = requests.get("{0}{1}".format(base_url, parameters), auth=(username, password))
         response_details = request.json()
 
-    except IOError, e:
+    except requests.ConnectionError, e:
         print "[ERROR] Fetch failed ({0}): {1}{2}\n".format(e, base_url, parameters)
         sys.exit(1)
 
